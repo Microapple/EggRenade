@@ -21,11 +21,12 @@ public class eggListener extends PlayerListener {
    
     
     public void onPlayerEggThrow(PlayerEggThrowEvent event) {
+    	event.setHatching(plugin.isHatching);
     	Egg egg = event.getEgg();
     	Location loc = egg.getLocation();
     	World world = ((CraftWorld)loc.getWorld()).getHandle();
     	Player player = event.getPlayer();
-    	plugin.eggThrown(loc, player, world, egg);
+    	plugin.eggThrown(loc, player, world, egg, event);
     }
     
 }

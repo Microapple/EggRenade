@@ -1,13 +1,18 @@
 package us.microapple.eggrenade;
 /*
  * EggRenade
- * Version 1.5
+ * Version 1.6
  * By microapple
- * Tested with CB build 617
+ * Tested with CB build 670
  */
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 import java.util.logging.Logger;
 import org.bukkit.entity.Egg;
 import org.bukkit.entity.Player;
@@ -19,6 +24,7 @@ import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.PluginManager;
+import org.bukkit.util.config.Configuration;
 import org.bukkit.event.Event;
 import net.minecraft.server.World;
 import net.minecraft.server.EntityTNTPrimed;
@@ -30,6 +36,10 @@ public class EggRenade extends JavaPlugin {
 
     public Set<Player> eggUsers = new HashSet<Player>();
 	public static PermissionHandler Permissions;
+	public boolean isHatching;
+	public long delayTime;
+	public float yield;
+
     private static final Logger log = Logger.getLogger("Minecraft");
 
 
@@ -38,9 +48,13 @@ public class EggRenade extends JavaPlugin {
 	public void onEnable() {
 		PluginDescriptionFile pdfFile = this.getDescription();
 		System.out.println(pdfFile.getName() + " version " + pdfFile.getVersion() + " is enabled!");    
-		 
+		this.loadConfigFile();
+		Configuration cfg = this.getConfiguration();
+        int intyield = cfg.getInt("TNT_Yield", 1);
+        yield = (int) intyield;
+        int intDelayTime = cfg.getInt("Grenade_Delay_Time", 4);
+        delayTime = Long.valueOf(intDelayTime);
 		PluginManager pm = getServer().getPluginManager();
-        //Create PlayerCommand listener
 		pm.registerEvent(Event.Type.PLAYER_EGG_THROW, this.eggeventlistener, Event.Priority.Low, this);
 		setupPermissions();
 		}
@@ -49,12 +63,30 @@ public class EggRenade extends JavaPlugin {
 		PluginDescriptionFile pdfFile = this.getDescription();
 		System.out.println(pdfFile.getName() + " version " + pdfFile.getVersion() + " has been disabled!");        
 		}
-	public void eggThrown(Location loc, Player player, World world, Egg egg){
+	
+	public void eggThrown(final Location loc, Player player, final World world, Egg egg, Event event){
 		if(enabled(player) == true){
-			EntityTNTPrimed tnt = new EntityTNTPrimed((net.minecraft.server.World) world, loc.getX(), loc.getY(), loc.getZ());
-			world.a(tnt);
+			isHatching = false;
+			long actualDelayTime = delayTime * 20;
+			this.getServer().getScheduler().scheduleSyncDelayedTask(this, new Runnable() {
+
+			    public void run() {
+			        grenade(world, loc);
+			    }
+			}, actualDelayTime);
+		}
+		else {
+			isHatching = true;
 		}
 	
+	}
+	public void grenade(World world, Location loc) {
+		
+		EntityTNTPrimed tnt = new EntityTNTPrimed((net.minecraft.server.World) world, loc.getX(), loc.getY(), loc.getZ());
+		//world.a(tnt);
+		float realYield = yield * 4;
+		world.a(tnt, loc.getX(), loc.getY(), loc.getZ(), realYield);
+		
 	}
 	public boolean onCommand(CommandSender sender, Command command, String commandLabel, String[] args)	{
 		String commandName = command.getName().toLowerCase();
@@ -135,6 +167,31 @@ public class EggRenade extends JavaPlugin {
 	          }
 	      }
 	  }
+	public void loadConfigFile() {
+		// load config file, creating it first if it doesn't exist
+		// Needs import java.io.File;
+		//import java.io.InputStream;
+		//import java.io.FileOutputStream;
+		//import java.util.jar.JarFile;
+		//import java.util.jar.JarEntry;
+		File configFile = new File(this.getDataFolder(), "config.yml");
+			if (!configFile.canRead()) try {
+				configFile.getParentFile().mkdirs();
+				JarFile jar = new JarFile(this.getFile());
+				JarEntry entry = jar.getJarEntry("config.yml");
+				InputStream is = jar.getInputStream(entry);
+				FileOutputStream os = new FileOutputStream(configFile);
+				byte[] buf = new byte[(int)entry.getSize()];
+				is.read(buf, 0, (int)entry.getSize());
+				os.write(buf);
+		os.close();
+		this.getConfiguration().load();
+		} catch (Exception e) {
+		System.out.println("EggRenade: could not create configuration file");
+		}
+
+
+	}
 	
 
 }
