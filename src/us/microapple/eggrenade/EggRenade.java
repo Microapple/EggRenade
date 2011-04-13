@@ -1,7 +1,7 @@
 package us.microapple.eggrenade;
 /*
  * EggRenade
- * Version 1.6
+ * Version 1.6_1
  * By microapple
  * Tested with CB build 670
  */
@@ -50,8 +50,15 @@ public class EggRenade extends JavaPlugin {
 		System.out.println(pdfFile.getName() + " version " + pdfFile.getVersion() + " is enabled!");    
 		this.loadConfigFile();
 		Configuration cfg = this.getConfiguration();
-        int intyield = cfg.getInt("TNT_Yield", 1);
-        yield = (int) intyield;
+        String stringyield = cfg.getString("TNT_Yield", "1.0");
+        try
+        {
+          yield = Float.valueOf(stringyield.trim()).floatValue();
+        }
+        catch (NumberFormatException nfe)
+        {
+          System.out.println("EggRenade: Invalid Yeild ammount");
+        }
         int intDelayTime = cfg.getInt("Grenade_Delay_Time", 4);
         delayTime = Long.valueOf(intDelayTime);
 		PluginManager pm = getServer().getPluginManager();
