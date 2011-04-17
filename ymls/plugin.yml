@@ -1,9 +1,14 @@
 name: EggRenade
 main: us.microapple.eggrenade.EggRenade
-version: 1.6_1
+version: 1.7
 commands:
   grenade:
     description: Toggles egg grenades
     usage: |
            Incorrect usage of /<command>. Examples:
            /<command>
+  moltov:
+    description: Toggles egg moltov cocktails.
+    usage: |
+          Incorrect usage of /<command>. Exampled:
+          /<command>

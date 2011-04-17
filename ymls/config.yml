@@ -8,3 +8,6 @@ Grenade_Delay_Time: 4
 
 Default_On: false
 #If set to true, everyone can use eggs all the time without typing /grenade to enable. Default (recommended): false
+
+Moltov_Yield: 10
+#Number of fires each moltov could potentially cause.
