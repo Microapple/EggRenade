@@ -1,0 +1,10 @@
+#EggRenade Configuration File
+
+TNT_Yield: 1
+#How many TNT each grenade spawns.
+
+Grenade_Delay_Time: 4
+#Length (in seconds) between Egg hitting the ground and explosion
+
+Default_On: false
+#If set to true, everyone can use eggs all the time without typing /grenade to enable. Default (recommended): false

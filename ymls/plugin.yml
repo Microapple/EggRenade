@@ -1,0 +1,9 @@
+name: EggRenade
+main: us.microapple.eggrenade.EggRenade
+version: 1.6_1
+commands:
+  grenade:
+    description: Toggles egg grenades
+    usage: |
+           Incorrect usage of /<command>. Examples:
+           /<command>
