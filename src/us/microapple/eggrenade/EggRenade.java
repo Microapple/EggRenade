@@ -1,9 +1,9 @@
 package us.microapple.eggrenade;
 /*
  * EggRenade
- * Version 1.7
+ * Version 1.7.1
  * By microapple
- * Tested with CB build 670
+ * Tested with CB build 733
  */
 
 import java.io.File;

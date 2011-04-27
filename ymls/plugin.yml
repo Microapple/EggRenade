@@ -1,6 +1,6 @@
 name: EggRenade
 main: us.microapple.eggrenade.EggRenade
-version: 1.7
+version: 1.7.1
 commands:
   grenade:
     description: Toggles egg grenades
