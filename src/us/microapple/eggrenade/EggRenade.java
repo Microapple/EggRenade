@@ -33,14 +33,14 @@ import us.microapple.eggrenade.eggListener;
 public class EggRenade extends JavaPlugin {
 
     public Set<Player> eggUsers = new HashSet<Player>();
-    public Set<Player> moltovUsers = new HashSet<Player>();
+    public Set<Player> molotovUsers = new HashSet<Player>();
     private Random generator = new Random();
 	//public static PermissionHandler Permissions;
 	public boolean isHatching;
 	public long delayTime;
 	public float yield;
 	public String defaultOn;
-	public int moltovYield;
+	public int molotovYield;
 
 	
 	public void onEnable() {
@@ -62,7 +62,7 @@ public class EggRenade extends JavaPlugin {
         int intDelayTime = cfg.getInt("Grenade_Delay_Time", 4);
         delayTime = Long.valueOf(intDelayTime);
         defaultOn = cfg.getString("Default_On", "false");
-        moltovYield = cfg.getInt("Moltov_Yield", 10);
+        molotovYield = cfg.getInt("molotov_Yield", 10);
         new eggListener(this);
 		}
 	
@@ -83,9 +83,9 @@ public class EggRenade extends JavaPlugin {
 			}, actualDelayTime);
 			
 		}
-		if(moltovUsers.contains(player)) {
+		if(molotovUsers.contains(player)) {
 			isHatching = false;
-			moltov(loc);
+			molotov(loc);
 		}
 		else {
 			isHatching = true;
@@ -93,14 +93,14 @@ public class EggRenade extends JavaPlugin {
 	
 	}
 	
-	public void moltov(Location loc) {
-		int moltovTimer = 0;
-		int realMoltovYield = moltovYield - 1;
-		while(moltovTimer < realMoltovYield) {
+	public void molotov(Location loc) {
+		int molotovTimer = 0;
+		int realmolotovYield = molotovYield - 1;
+		while(molotovTimer < realmolotovYield) {
 			Location spawnLoc = getSpawnLocation(loc, 5, 0);
 			Block block = loc.getWorld().getBlockAt(spawnLoc);
 			block.setType(Material.FIRE);
-			moltovTimer = moltovTimer + 1;
+			molotovTimer = molotovTimer + 1;
 		}
 	}
 	public void grenade(World world, Location loc) {
@@ -117,122 +117,57 @@ public class EggRenade extends JavaPlugin {
         if (sender instanceof Player) {
             if (commandName.equals("grenade")) {
                 		if(args.length >= 0) {
-                			if(false);
-                			/*if(getServer().getPluginManager().isPluginEnabled("Permissions") == true) {
-                				//Permisions ONLINE mode
-	        	            	Player player = (Player) sender;
-	        	            	if (EggRenade.Permissions.has(player, "egg.renade") == true) {
+                			Player player = (Player) sender;
+                			if(player.hasPermission("egg.grenade") || player.isOp()){
 	        	            		boolean onList = eggUsers.contains(player);
 	        	            		if(onList == true) {
 	        	            			eggUsers.remove(player);
 	        	            			player.sendMessage("EggRenade Disabled");
 	        	            		}
 	        	            		else {
-	        	            			if(moltovUsers.contains(player)) {
-	        	            				moltovUsers.remove(player);
-	        	            				player.sendMessage("EggMoltov Disabled");
-	        	            			}
+	        	            			if(molotovUsers.contains(player)) {
+	        	            				molotovUsers.remove(player);
+	        	            				player.sendMessage("Eggmolotov Disabled");
+	        	            				}
 	        	            			eggUsers.add(player);
 	        	            			player.sendMessage("EggRenade Enabled");
 	        	            		}
 	        	            		
+	        	            }
+	        	            else {
+	    	                      sender.sendMessage(ChatColor.RED + "You do not have access to this command.");
 	        	            	}
-	        	            	else {
-	    	                        player.sendMessage(ChatColor.RED + "You do not have access to this command.");
-	        	            	}
-                			}*/ 
-                			else {
-                				//Permissions OFFLINE mode
-                				boolean op;;
-        						op = sender.isOp();
-                            	if (op == true){
-                            		Player player = (Player) sender;
-                            		boolean onList = eggUsers.contains(player);
-	        	            		if(onList == true) {
-	        	            			eggUsers.remove(player);
-	        	            			player.sendMessage("EggRenade Disabled");
-	        	            		}
-	        	            		else {
-	        	            			if(moltovUsers.contains(player)) {
-	        	            				moltovUsers.remove(player);
-	        	            				player.sendMessage("EggMoltov Disabled");
-	        	            			}
-	        	            			eggUsers.add(player);
-	        	            			player.sendMessage("EggRenade Enabled");
-	        	            		}
-                            		
-                            	}
-                            	else {
-    	        	            	Player player = (Player) sender;
-	    	                        player.sendMessage(ChatColor.RED + "You do not have access to this command.");
-
-                            	}
-                			}
-                		}
-                		else {
-                			return false;
-                		}
+                		}	 
                 }
-            if(commandName.equals("moltov")){
+                
+             else if(commandName.equals("molotov")){
             	if(args.length >= 0) {
-            		if(false);
-        			/*if(getServer().getPluginManager().isPluginEnabled("Permissions") == true) {
-        				//Permisions ONLINE mode
-    	            	Player player = (Player) sender;
-    	            	if (EggRenade.Permissions.has(player, "egg.moltov") == true) {
-    	            		boolean onList = moltovUsers.contains(player);
+            		if(sender.hasPermission("egg.molotov") || sender.isOp()) {
+    	            		Player player = (Player) sender;
+    	            		boolean onList = molotovUsers.contains(player);
     	            		if(onList == true) {
-    	            			moltovUsers.remove(player);
-    	            			player.sendMessage("EggMoltov Disabled");
+    	            			molotovUsers.remove(player);
+    	            			player.sendMessage("Eggmolotov Disabled");
     	            		}
     	            		else {
     	            			if(eggUsers.contains(player)) {
     	            				eggUsers.remove(player);
     	            				player.sendMessage("EggRenade Disabled");
     	            			}
-    	            			moltovUsers.add(player);
-    	            			player.sendMessage("EggMoltov Enabled");
+    	            			molotovUsers.add(player);
+    	            			player.sendMessage("Eggmolotov Enabled");
     	            		}
-    	            		
+    	            }
+    	            else {
+	                        sender.sendMessage(ChatColor.RED + "You do not have access to this command.");
     	            	}
-    	            	else {
-	                        player.sendMessage(ChatColor.RED + "You do not have access to this command.");
-    	            	}
-        			} */
-        			else {
-        				//Permissions OFFLINE mode
-        				boolean op;;
-						op = sender.isOp();
-                    	if (op == true){
-                    		Player player = (Player) sender;
-                    		boolean onList = moltovUsers.contains(player);
-    	            		if(onList == true) {
-    	            			moltovUsers.remove(player);
-    	            			player.sendMessage("EggMoltov Disabled");
-    	            		}
-    	            		else {
-    	            			if(eggUsers.contains(player)) {
-    	            				eggUsers.remove(player);
-    	            				player.sendMessage("EggRenade Disabled");
-    	            			}
-    	            			moltovUsers.add(player);
-    	            			player.sendMessage("EggMoltov Enabled");
-    	            		}
-                    		
-                    	}
-                    	else {
-        	            	Player player = (Player) sender;
-	                        player.sendMessage(ChatColor.RED + "You do not have access to this command.");
-
-                    	}
         			}
         		}
-        		else {
+        	else {
         			return false;
         		}
             	
             }
-        }
 		return true;
 	}
 	
