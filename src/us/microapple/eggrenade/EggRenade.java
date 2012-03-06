@@ -6,15 +6,10 @@ package us.microapple.eggrenade;
  * Tested with CB build 733
  */
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
+
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
-import java.util.logging.Logger;
 import org.bukkit.entity.Egg;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginDescriptionFile;
@@ -26,13 +21,13 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.plugin.PluginManager;
-import org.bukkit.util.config.Configuration;
+import org.bukkit.configuration.file.*;
 import org.bukkit.event.Event;
-import net.minecraft.server.World;
-import net.minecraft.server.EntityTNTPrimed;
-import com.nijiko.permissions.PermissionHandler;
-import com.nijikokun.bukkit.Permissions.Permissions;
+import org.bukkit.World;
+//import net.minecraft.server.EntityTNTPrimed;
+import us.microapple.eggrenade.eggListener;
+//import com.nijiko.permissions.PermissionHandler;
+//import com.nijikokun.bukkit.Permissions.Permissions;
 
 
 public class EggRenade extends JavaPlugin {
@@ -40,24 +35,21 @@ public class EggRenade extends JavaPlugin {
     public Set<Player> eggUsers = new HashSet<Player>();
     public Set<Player> moltovUsers = new HashSet<Player>();
     private Random generator = new Random();
-	public static PermissionHandler Permissions;
+	//public static PermissionHandler Permissions;
 	public boolean isHatching;
 	public long delayTime;
 	public float yield;
 	public String defaultOn;
 	public int moltovYield;
 
-    private static final Logger log = Logger.getLogger("Minecraft");
-
-
-    
-    private final eggListener eggeventlistener = new eggListener(this);
-    
+	
 	public void onEnable() {
 		PluginDescriptionFile pdfFile = this.getDescription();
-		System.out.println(pdfFile.getName() + " version " + pdfFile.getVersion() + " is enabled!");    
-		this.loadConfigFile();
-		Configuration cfg = this.getConfiguration();
+		System.out.println(pdfFile.getName() + " version " + pdfFile.getVersion() + " is enabled!");
+		this.getConfig().options().copyDefaults(true);
+		this.saveConfig();
+		this.reloadConfig();
+		FileConfiguration cfg = this.getConfig();
         String stringyield = cfg.getString("TNT_Yield", "1.0");
         try
         {
@@ -71,9 +63,7 @@ public class EggRenade extends JavaPlugin {
         delayTime = Long.valueOf(intDelayTime);
         defaultOn = cfg.getString("Default_On", "false");
         moltovYield = cfg.getInt("Moltov_Yield", 10);
-		PluginManager pm = getServer().getPluginManager();
-		pm.registerEvent(Event.Type.PLAYER_EGG_THROW, this.eggeventlistener, Event.Priority.Low, this);
-		setupPermissions();
+        new eggListener(this);
 		}
 	
 	public void onDisable() {
@@ -82,7 +72,7 @@ public class EggRenade extends JavaPlugin {
 		}
 	
 	public void eggThrown(final Location loc, Player player, final World world, Egg egg, Event event){
-		if(defaultOn == "true") {
+		if(defaultOn == "true" || eggUsers.contains(player)) {
 			isHatching = false;
 			long actualDelayTime = delayTime * 20;
 			this.getServer().getScheduler().scheduleSyncDelayedTask(this, new Runnable() {
@@ -92,16 +82,6 @@ public class EggRenade extends JavaPlugin {
 			    }
 			}, actualDelayTime);
 			
-		}
-		if(eggUsers.contains(player)){
-			isHatching = false;
-			long actualDelayTime = delayTime * 20;
-			this.getServer().getScheduler().scheduleSyncDelayedTask(this, new Runnable() {
-
-			    public void run() {
-			        grenade(world, loc);
-			    }
-			}, actualDelayTime);
 		}
 		if(moltovUsers.contains(player)) {
 			isHatching = false;
@@ -125,11 +105,11 @@ public class EggRenade extends JavaPlugin {
 	}
 	public void grenade(World world, Location loc) {
 		
-		EntityTNTPrimed tnt = new EntityTNTPrimed((net.minecraft.server.World) world, loc.getX(), loc.getY(), loc.getZ());
+		//EntityTNTPrimed tnt = new EntityTNTPrimed((net.minecraft.server.World) world, loc.getX(), loc.getY(), loc.getZ());
 		//world.a(tnt);
 		float realYield = yield * 4;
-		world.a(tnt, loc.getX(), loc.getY(), loc.getZ(), realYield);
-		
+		//world.a(tnt, loc.getX(), loc.getY(), loc.getZ(), realYield); */
+		world.createExplosion(loc, realYield);		
 	}
 	public boolean onCommand(CommandSender sender, Command command, String commandLabel, String[] args)	{
 		String commandName = command.getName().toLowerCase();
@@ -137,7 +117,8 @@ public class EggRenade extends JavaPlugin {
         if (sender instanceof Player) {
             if (commandName.equals("grenade")) {
                 		if(args.length >= 0) {
-                			if(getServer().getPluginManager().isPluginEnabled("Permissions") == true) {
+                			if(false);
+                			/*if(getServer().getPluginManager().isPluginEnabled("Permissions") == true) {
                 				//Permisions ONLINE mode
 	        	            	Player player = (Player) sender;
 	        	            	if (EggRenade.Permissions.has(player, "egg.renade") == true) {
@@ -159,7 +140,7 @@ public class EggRenade extends JavaPlugin {
 	        	            	else {
 	    	                        player.sendMessage(ChatColor.RED + "You do not have access to this command.");
 	        	            	}
-                			} 
+                			}*/ 
                 			else {
                 				//Permissions OFFLINE mode
                 				boolean op;;
@@ -194,7 +175,8 @@ public class EggRenade extends JavaPlugin {
                 }
             if(commandName.equals("moltov")){
             	if(args.length >= 0) {
-        			if(getServer().getPluginManager().isPluginEnabled("Permissions") == true) {
+            		if(false);
+        			/*if(getServer().getPluginManager().isPluginEnabled("Permissions") == true) {
         				//Permisions ONLINE mode
     	            	Player player = (Player) sender;
     	            	if (EggRenade.Permissions.has(player, "egg.moltov") == true) {
@@ -216,7 +198,7 @@ public class EggRenade extends JavaPlugin {
     	            	else {
 	                        player.sendMessage(ChatColor.RED + "You do not have access to this command.");
     	            	}
-        			} 
+        			} */
         			else {
         				//Permissions OFFLINE mode
         				boolean op;;
@@ -225,14 +207,14 @@ public class EggRenade extends JavaPlugin {
                     		Player player = (Player) sender;
                     		boolean onList = moltovUsers.contains(player);
     	            		if(onList == true) {
-    	            			if(eggUsers.contains(player)) {
-    	            				eggUsers.remove(player);
-    	            				player.sendMessage("EggRenade Disabled");
-    	            			}
     	            			moltovUsers.remove(player);
     	            			player.sendMessage("EggMoltov Disabled");
     	            		}
     	            		else {
+    	            			if(eggUsers.contains(player)) {
+    	            				eggUsers.remove(player);
+    	            				player.sendMessage("EggRenade Disabled");
+    	            			}
     	            			moltovUsers.add(player);
     	            			player.sendMessage("EggMoltov Enabled");
     	            		}
@@ -259,15 +241,15 @@ public class EggRenade extends JavaPlugin {
 	private void setupPermissions() {
 	      Plugin test = this.getServer().getPluginManager().getPlugin("Permissions");
 
-	      if (this.Permissions == null) {
+	      /*if (this.Permissions == null) {
 	          if (test != null) {
 	              this.Permissions = ((Permissions)test).getHandler();
 	          } else {
 	              log.info("EggRenade: Permission system not detected, defaulting to OP");
 	          }
-	      }
+	      }*/
 	  }
-	public void loadConfigFile() {
+	/*public void loadConfigFile() {
 		// load config file, creating it first if it doesn't exist
 		// Needs import java.io.File;
 		//import java.io.InputStream;
@@ -285,13 +267,15 @@ public class EggRenade extends JavaPlugin {
 				is.read(buf, 0, (int)entry.getSize());
 				os.write(buf);
 		os.close();
-		this.getConfiguration().load();
-		} catch (Exception e) {
+		FileConfiguration cfg = this.getConfig();
+		cfg.load(configFile);
+		} 
+		catch (Exception e) {
 		System.out.println("EggRenade: could not create configuration file");
-		}
+		} 
 
 
-	}
+	} */
 public Location getSpawnLocation(Location location, int SpawnRadius, int initial) {
 		
 	

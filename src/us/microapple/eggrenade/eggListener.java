@@ -1,34 +1,44 @@
 package us.microapple.eggrenade;
 
 import us.microapple.eggrenade.EggRenade;
+
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.craftbukkit.CraftWorld;
+//import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.entity.Egg;
 import org.bukkit.entity.Player;
-import org.bukkit.event.player.PlayerListener;
+import org.bukkit.event.*;
 import org.bukkit.event.player.PlayerEggThrowEvent;
-import net.minecraft.server.World;
+
+import org.bukkit.World;
 
 
 
-public class eggListener extends PlayerListener {
+public class eggListener implements Listener {
 
-	public static EggRenade plugin;
-    public eggListener(EggRenade instance) {
-    plugin = instance;
-    }
-    	
-   
+	private EggRenade plugin;
+	
+    public eggListener(EggRenade plugin) {
+    	plugin.getServer().getPluginManager().registerEvents(this, plugin);
+    	this.plugin = plugin;
+    } 
     
-    public void onPlayerEggThrow(PlayerEggThrowEvent event) {
+
+    @EventHandler(priority = EventPriority.LOW)
+    public void whenEggIsThrown(final PlayerEggThrowEvent event) {
        	Egg egg = event.getEgg();
     	Location loc = egg.getLocation();
-    	World world = ((CraftWorld)loc.getWorld()).getHandle();
     	Player player = event.getPlayer();
+    	World world = loc.getWorld();
     	plugin.eggThrown(loc, player, world, egg, event);
     	event.setHatching(plugin.isHatching);
-
     }
+    public void finalEggListener() {
+    	Bukkit.getServer().getPluginManager().registerEvents(this, plugin);
+    }
+    	 
+
+    	
     
 }
     	
