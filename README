@@ -6,7 +6,6 @@ Features:
     Toggle-able command to turn on and off grenades.
     PermissionsBukkit / SuperPerms Support! 
 
-View Source
 Usage:
 
 Have access to 'egg.grenade' (if permissions is enabled) or be an op (if the server doesn't have permissions) Type '/grenade' to toggle on egg grenades. Throw an egg or two at your target and watch as the egg explodes a couple seconds after impact! (Be careful where you're aiming!)
@@ -14,46 +13,21 @@ Permission Node:
 
 - egg.grenade This permission node gives access to '/grenade'.
 
-- egg.moltov This permission nod gives access to '/moltov'.
+- egg.molotov This permission nod gives access to '/molotov'.
 
 I'd like to extend a special thank you to all the wonderful people on #bukkitdev. This plugin wouldn't be out for weeks (if ever) without their help! Thanks guys!
 
 Todo:
 
     Optional 'Cool down'
-    Require you to buy grenades (iConomy support)
-    Logging to server who threw a grenade and where
     Whatever else people want! 
 
 Changelog:
 
-Version 2.0
-    Compatibility with Even wanted to chuck a grenade at your inferior-looking house in minecraft? Now you can!
-Features:
+Version 2.1
 
-    Eggs can now be grenades!
-    Toggle-able command to turn on and off grenades.
-    PermissionsBukkit / SuperPerms Support! 
-
-View Source
-Usage:
-
-Have access to 'egg.grenade' (if permissions is enabled) or be an op (if the server doesn't have permissions) Type '/grenade' to toggle on egg grenades. Throw an egg or two at your target and watch as the egg explodes a couple seconds after impact! (Be careful where you're aiming!)
-Permission Node:
-
-- egg.grenade This permission node gives access to '/grenade'.
-
-- egg.moltov This permission nod gives access to '/moltov'.
-
-I'd like to extend a special thank you to all the wonderful people on #bukkitdev. This plugin wouldn't be out for weeks (if ever) without their help! Thanks guys!
-Todo:
-
-    Optional 'Cool down'
-    Require you to buy grenades (iConomy support)
-    Logging to server who threw a grenade and where
-    Whatever else people want! 
-
-Changelog:
+    Removed economy support, but added Vault support for almost all economy plugins. (If you want to charge for each grenade/molotov, you need to download Vault and put it in your plugins folder)
+    Improved Molotov spread algorithms
 
 Version 2.0
 
@@ -70,7 +44,7 @@ Version 1.7.1
 Version 1.7
 
     Added a Default On option for grenades.
-    Added moltov cocktails (/moltov) with permission node egg.moltov (Yes, I know I spelled it wrong :p) 
+    Added molotov cocktails (/moltov) with permission node egg.moltov (Yes, I know I spelled it wrong :p) 
 
 Version 1.6.1
 

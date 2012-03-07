@@ -1,7 +1,7 @@
 package us.microapple.eggrenade;
 /*
  * EggRenade
- * Version 2.0
+ * Version 2.1
  * By microapple (microkraft@gmail.com)
  * Built on Bukkit 1.2.3-R0.1
  * Tested with CraftBukkit 1.2.3-R0.1
@@ -12,9 +12,13 @@ package us.microapple.eggrenade;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
+
+import net.milkbowl.vault.economy.Economy;
+
 import org.bukkit.entity.Egg;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginDescriptionFile;
+import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.ChatColor;
@@ -26,7 +30,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.*;
 import org.bukkit.event.Event;
 import org.bukkit.World;
-import com.iCo6.*;
 //import net.minecraft.server.EntityTNTPrimed;
 import us.microapple.eggrenade.eggListener;
 //import com.nijiko.permissions.PermissionHandler;
@@ -45,9 +48,7 @@ public class EggRenade extends JavaPlugin {
 	public String defaultOn;
 	public int molotovYield;
 	public Player currentPlayer;
-    public iConomy PlugiConomy = null;
-
-
+    public Economy econ = null;
 	
 	public void onEnable() {
 		PluginDescriptionFile pdfFile = this.getDescription();
@@ -65,16 +66,35 @@ public class EggRenade extends JavaPlugin {
         {
           System.out.println("[EggRenade] Invalid Yeild ammount");
         }
-        int intDelayTime = cfg.getInt("Grenade_Delay_Time", 4);
+        int intDelayTime = cfg.getInt("Grenade_Delay_Time");
         delayTime = Long.valueOf(intDelayTime);
         defaultOn = cfg.getString("Default_On", "false");
-        molotovYield = cfg.getInt("molotov_Yield", 10);
+        molotovYield = cfg.getInt("Molotov_Yield");
         new eggListener(this);
         
-        getServer().getPluginManager().registerEvents(new IConomyListener(this), this);
-
-		}
+        if (!setupEconomy() && (cfg.getBoolean("chargeForGrenades") || cfg.getBoolean("chargeForMolotovs"))) {
+            System.out.println("[EggRenade] - Disabled due to no Vault dependency found! " +
+            		"(if you don't want to use Vault, please disable charging for grenades/molotovs " +
+            		"in config.yml!)");
+            getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
+        
+	}
 	
+    private boolean setupEconomy() {
+        if (getServer().getPluginManager().getPlugin("Vault") == null) {
+            return false;
+        }
+        RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
+        if (rsp == null) {
+            return false;
+        }
+        econ = rsp.getProvider();
+        return econ != null;
+    }
+
+
 	public void onDisable() {
 		PluginDescriptionFile pdfFile = this.getDescription();
 		System.out.println(pdfFile.getName() + " version " + pdfFile.getVersion() + " has been disabled!");        
@@ -83,9 +103,9 @@ public class EggRenade extends JavaPlugin {
 	public void eggThrown(final Location loc, Player player, final World world, Egg egg, Event event){
 		currentPlayer = player;
 		if(defaultOn == "true" || eggUsers.contains(player)) {
-			IConomyListener iCo = new IConomyListener(this);
+			EconHandler Eco = new EconHandler(this);
 			if(this.getConfig().getBoolean("chargeForGrenades")) {
-				if(!iCo.spendMoney(player, true)) {
+				if(!Eco.spendMoney(player, true)) {
 					player.sendMessage(ChatColor.RED + "You have incificient funds to buy a grenade.");
 					return;
 				}
@@ -104,13 +124,13 @@ public class EggRenade extends JavaPlugin {
 		}
 		if(molotovUsers.contains(player)) {
 			isHatching = false;
-			molotov(loc);
-			IConomyListener iCo = new IConomyListener(this);
+			EconHandler Eco = new EconHandler(this);
 			if(this.getConfig().getBoolean("chargeForMolotovs")) {
-				if(!iCo.spendMoney(player, false)) {
+				if(!Eco.spendMoney(player, false)) {
 					player.sendMessage(ChatColor.RED + "You have incificient funds to buy a grenade.");
 				}
 			}
+			molotov(loc);
 		}
 		else {
 			isHatching = true;
@@ -126,7 +146,8 @@ public class EggRenade extends JavaPlugin {
 			Location spawnLoc = getSpawnLocation(loc, 5, 0);
 			Block block = loc.getWorld().getBlockAt(spawnLoc);
 			block.setType(Material.FIRE);
-			molotovTimer = molotovTimer + 1;
+			if(block.getType() == Material.FIRE)
+				molotovTimer = molotovTimer + 1;
 		}
 	}
 	public void grenade(World world, Location loc) {
@@ -249,12 +270,15 @@ public Location getSpawnLocation(Location location, int SpawnRadius, int initial
 	
 		double randX = generator.nextDouble() * SpawnRadius;
 		double randZ = generator.nextDouble() * SpawnRadius;
+		//double randY = generator.nextDouble() * 3;
 		double realRandX = randX + initial;
 		double realRandZ = randZ + initial;
+		//double realRandY = randY + initial;
 		
 		Location spawnLoc = location;
 		double currentX = location.getX();
 		double currentZ = location.getZ();
+		//double currentY = location.getY();
 		
 		boolean shouldAddX = generator.nextBoolean();
 		boolean shouldAddZ = generator.nextBoolean();
@@ -270,6 +294,16 @@ public Location getSpawnLocation(Location location, int SpawnRadius, int initial
 		}
 		else {
 			spawnLoc.setZ(currentZ - realRandZ);
+		}
+		if(!spawnLoc.getBlock().isEmpty()) {
+			while(!spawnLoc.getBlock().isEmpty() && spawnLoc.getBlock().getY() < 254) {
+				spawnLoc.setY(location.getY() + 1);
+				return spawnLoc;
+			}
+			while(!spawnLoc.getBlock().isEmpty() && spawnLoc.getBlock().getY() > 0) {
+				spawnLoc.setY(location.getY() - 1);
+				return spawnLoc;
+			}
 		}
 		return spawnLoc;
 		

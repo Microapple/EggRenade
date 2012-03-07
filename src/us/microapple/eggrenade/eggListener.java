@@ -2,7 +2,6 @@ package us.microapple.eggrenade;
 
 import us.microapple.eggrenade.EggRenade;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 //import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.entity.Egg;
@@ -32,14 +31,7 @@ public class eggListener implements Listener {
     	World world = loc.getWorld();
     	plugin.eggThrown(loc, player, world, egg, event);
     	event.setHatching(plugin.isHatching);
-    }
-    public void finalEggListener() {
-    	Bukkit.getServer().getPluginManager().registerEvents(this, plugin);
-    }
-    	 
-
-    	
-    
+    }    
 }
     	
 
