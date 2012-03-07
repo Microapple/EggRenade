@@ -1,9 +1,11 @@
 package us.microapple.eggrenade;
 /*
  * EggRenade
- * Version 1.7.1
- * By microapple
- * Tested with CB build 733
+ * Version 2.0
+ * By microapple (microkraft@gmail.com)
+ * Built on Bukkit 1.2.3-R0.1
+ * Tested with CraftBukkit 1.2.3-R0.1
+ * 
  */
 
 
@@ -24,6 +26,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.*;
 import org.bukkit.event.Event;
 import org.bukkit.World;
+import com.iCo6.*;
 //import net.minecraft.server.EntityTNTPrimed;
 import us.microapple.eggrenade.eggListener;
 //import com.nijiko.permissions.PermissionHandler;
@@ -41,6 +44,9 @@ public class EggRenade extends JavaPlugin {
 	public float yield;
 	public String defaultOn;
 	public int molotovYield;
+	public Player currentPlayer;
+    public iConomy PlugiConomy = null;
+
 
 	
 	public void onEnable() {
@@ -57,13 +63,16 @@ public class EggRenade extends JavaPlugin {
         }
         catch (NumberFormatException nfe)
         {
-          System.out.println("EggRenade: Invalid Yeild ammount");
+          System.out.println("[EggRenade] Invalid Yeild ammount");
         }
         int intDelayTime = cfg.getInt("Grenade_Delay_Time", 4);
         delayTime = Long.valueOf(intDelayTime);
         defaultOn = cfg.getString("Default_On", "false");
         molotovYield = cfg.getInt("molotov_Yield", 10);
         new eggListener(this);
+        
+        getServer().getPluginManager().registerEvents(new IConomyListener(this), this);
+
 		}
 	
 	public void onDisable() {
@@ -72,8 +81,18 @@ public class EggRenade extends JavaPlugin {
 		}
 	
 	public void eggThrown(final Location loc, Player player, final World world, Egg egg, Event event){
+		currentPlayer = player;
 		if(defaultOn == "true" || eggUsers.contains(player)) {
+			IConomyListener iCo = new IConomyListener(this);
+			if(this.getConfig().getBoolean("chargeForGrenades")) {
+				if(!iCo.spendMoney(player, true)) {
+					player.sendMessage(ChatColor.RED + "You have incificient funds to buy a grenade.");
+					return;
+				}
+				
+			}
 			isHatching = false;
+			currentPlayer = player;
 			long actualDelayTime = delayTime * 20;
 			this.getServer().getScheduler().scheduleSyncDelayedTask(this, new Runnable() {
 
@@ -86,6 +105,12 @@ public class EggRenade extends JavaPlugin {
 		if(molotovUsers.contains(player)) {
 			isHatching = false;
 			molotov(loc);
+			IConomyListener iCo = new IConomyListener(this);
+			if(this.getConfig().getBoolean("chargeForMolotovs")) {
+				if(!iCo.spendMoney(player, false)) {
+					player.sendMessage(ChatColor.RED + "You have incificient funds to buy a grenade.");
+				}
+			}
 		}
 		else {
 			isHatching = true;
@@ -94,6 +119,7 @@ public class EggRenade extends JavaPlugin {
 	}
 	
 	public void molotov(Location loc) {
+		System.out.println("[EggRenade] " + currentPlayer.getName() + " threw a MOLOTOV. (" + loc.getBlockX() + ", " + loc.getBlockY() + ", " + loc.getBlockZ() + ")");
 		int molotovTimer = 0;
 		int realmolotovYield = molotovYield - 1;
 		while(molotovTimer < realmolotovYield) {
@@ -109,7 +135,8 @@ public class EggRenade extends JavaPlugin {
 		//world.a(tnt);
 		float realYield = yield * 4;
 		//world.a(tnt, loc.getX(), loc.getY(), loc.getZ(), realYield); */
-		world.createExplosion(loc, realYield);		
+		world.createExplosion(loc, realYield);
+		System.out.println("[EggRenade] " + currentPlayer.getName() + " threw a GRENADE. (" + loc.getBlockX() + ", " + loc.getBlockY() + ", " + loc.getBlockZ() + ")");
 	}
 	public boolean onCommand(CommandSender sender, Command command, String commandLabel, String[] args)	{
 		String commandName = command.getName().toLowerCase();
@@ -129,6 +156,9 @@ public class EggRenade extends JavaPlugin {
 	        	            				molotovUsers.remove(player);
 	        	            				player.sendMessage("Eggmolotov Disabled");
 	        	            				}
+	        	            			if(this.getConfig().getBoolean("chargeForGrenade")) {
+	        	            				player.sendMessage("Each grenade will cost: " + this.getConfig().getInt("costPerGrenade"));
+	        	            			}
 	        	            			eggUsers.add(player);
 	        	            			player.sendMessage("EggRenade Enabled");
 	        	            		}
@@ -153,6 +183,9 @@ public class EggRenade extends JavaPlugin {
     	            			if(eggUsers.contains(player)) {
     	            				eggUsers.remove(player);
     	            				player.sendMessage("EggRenade Disabled");
+    	            			}
+    	            			if(this.getConfig().getBoolean("chargeForMolotov")) {
+    	            				player.sendMessage("Each molotov will cost: " + this.getConfig().getInt("costPerMolotov"));
     	            			}
     	            			molotovUsers.add(player);
     	            			player.sendMessage("Eggmolotov Enabled");

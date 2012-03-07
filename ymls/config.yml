@@ -11,3 +11,15 @@ Default_On: false
 
 Molotov_Yield: 10
 #Number of fires each molotov could potentially cause.
+
+chargeForGrenades: false
+#Whether or not to charge for the use of grenades
+
+costPerGrenade: 100
+#The amount of currency withdrawn from the grenade user's holdings
+
+chargeForMolotovs: false
+#Whether or not to charge for the use of molotovs
+
+costPerMolotov: 150
+#The amount of currency withdrawn from the molotov user's holdings
