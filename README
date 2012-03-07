@@ -57,7 +57,7 @@ Changelog:
 
 Version 2.0
 
-    Support for CraftBukkit build 733 (MC 1.5_02) -- Though is probably backwards compatible to MC 1.1.X
+    Support for CraftBukkit 1.2.3-R0.1 -- Though is probably backwards compatible to MC 1.1.X
     Code Support for iConomy, though not functioning yet
 
 Version 1.8 - 1.9
